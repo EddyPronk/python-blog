@@ -26,7 +26,7 @@ class Context(object):
         return 'urn:sha1:' + hashlib.sha1(readable).hexdigest()
     
 context = Context()
-lookup = TemplateLookup(directories=['/home/epronk/blog/weblog/templates', '.'])
+lookup = TemplateLookup(directories=['.'])
 
 class Post(object) : pass
 
@@ -46,16 +46,21 @@ posts2.sort(key = lambda p: p.date, reverse=True)
 
 def posts(): return posts2
 
+deploy_dir = os.path.join('deploy', 'blog')
+
+if not os.path.exists(deploy_dir):
+    os.makedirs(deploy_dir)
+
 for post in posts():
     print post.date, post.title
     mytemplate = Template(filename='templates/post.mako', lookup = lookup)
-    open(os.path.join('deploy', 'blog', post.filename), 'w').write(mytemplate.render(**context.vars(post=post)))
+    open(os.path.join(deploy_dir, post.filename), 'w').write(mytemplate.render(**context.vars(post=post)))
 
 def generate(infile, outfile, context):
     print outfile
     mytemplate = Template(filename=infile, lookup = lookup)
     try:
-        open(os.path.join('deploy', 'blog', outfile), 'w').write(mytemplate.render(**context.vars()))
+        open(os.path.join(deploy_dir, outfile), 'w').write(mytemplate.render(**context.vars()))
     except:
         print 'error'
         print exceptions.text_error_template().render()
